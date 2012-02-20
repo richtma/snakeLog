@@ -30,7 +30,7 @@ class CountryImporter:
                 country['latitude'] = information[4]
                 country['longitude'] = information[5]
                 country['timeoffset'] = information[6]
-                country['mainprefix'] = information[7]
+                country['primaryprefix'] = information[7]
                 country['prefixes'] = prefixes
                 db.addDXCC(country)
                 information = []
