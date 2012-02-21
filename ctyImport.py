@@ -49,3 +49,4 @@ class CountryImporter:
                 information = data
 
         cty.close()
+        db.commit()

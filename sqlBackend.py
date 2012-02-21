@@ -130,7 +130,7 @@ class Prefix(Base):
         return self._primary
     
     def set_primary(self, primary):
-        self._timeoffset = primary
+        self._primary = primary
     
 
     override_cqzone = property(get_override_cqzone, set_override_cqzone)
@@ -158,6 +158,8 @@ class Database:
 
     def addDXCC(self, dxcc):
         self.session.add(dxcc)
+
+    def commit(self):
         self.session.commit()
 
     def __del__(self):
