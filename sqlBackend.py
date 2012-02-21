@@ -1,25 +1,31 @@
 __author__ = 'core'
 
-import sqlite3
+from sqlalchemy import Boolean, Column, create_engine, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
-class Database:
+Base = declarative_base()
+engine = create_engine('sqlite:///data/snakeLog.db', echo=True)
+
+class DXCC(Base):
+    __tablename__ = 'dxccs'
+
+    _continent = Column(String(2))
+    _cqzone = Column(Integer)
+    _dxcc_id = Column(Integer, primary_key=True)
+    _ituzone = Column(Integer)
+    _latitude = Column(Float)
+    _longitude = Column(Float)
+    _name = Column(String)
+    _prefixes = relationship("Prefix")
+    _primaryprefix = relationship("Prefix", uselist=False)
+    _timeoffset = Column(Float)
+
     def __init__(self):
-        self.connection = sqlite3.connect("./data/snakeLog.sqlite")
-
-    def addDXCC(self, dxcc):
         pass
 
-class Qso:
-    def __init__(self):
-        pass
-
-class Station:
-    def __init__(self):
-        pass
-
-class DXCC:
-    def __init__(self):
-        pass
+    def __repr__(self):
+        return "<DXCC('%s', '%s')>" % (self._primaryprefix, self._name)
 
     def get_continent(self):
         return self._continent
@@ -84,3 +90,76 @@ class DXCC:
     prefixes = property(get_prefixes, set_prefixes)
     primaryprefix = property(get_primaryprefix, set_primaryprefix)
     timeoffset = property(get_timeoffset, set_timeoffset)
+
+class Prefix(Base):
+    __tablename__ = 'prefixes'
+
+    _override_cqzone = Column(Integer) #TODO: implementation
+    _override_ituzone = Column(Integer) #TODO: implementation
+    _prefix = Column(String, primary_key=True)
+    _primary = Column(Boolean)
+
+    _dxcc_id = Column(Integer, ForeignKey('dxccs._dxcc_id'))
+
+    def __init__(self, prefix, isPrimary):
+        self.set_prefix(prefix)
+        self.set_primary(isPrimary)
+
+    def __repr__(self):
+        return "<Prefix('%s')>" % self._prefix
+
+    def get_override_cqzone(self):
+        return self._override_cqzone
+
+    def set_override_cqzone(self, override_cqzone):
+        self._timeoffset = override_cqzone
+
+    def get_override_ituzone(self):
+        return self._override_ituzone
+
+    def set_override_ituzone(self, override_ituzone):
+        self._timeoffset = override_ituzone
+
+    def get_prefix(self):
+        return self._prefix
+
+    def set_prefix(self, prefix):
+        self._prefix = prefix
+        
+    def get_primary(self):
+        return self._primary
+    
+    def set_primary(self, primary):
+        self._timeoffset = primary
+    
+
+    override_cqzone = property(get_override_cqzone, set_override_cqzone)
+    override_ituzone = property(get_override_ituzone, set_override_ituzone)
+    prefix = property(get_prefix, set_prefix)
+    primary = property(get_primary, set_primary)
+    
+    
+class Qso:
+    def __init__(self):
+        pass
+
+class Station:
+    def __init__(self):
+        pass
+
+
+Base.metadata.create_all(engine)
+
+Session = sessionmaker(bind=engine)
+
+class Database:
+    def __init__(self):
+        self.session = Session()
+
+    def addDXCC(self, dxcc):
+        self.session.add(dxcc)
+        self.session.commit()
+
+    def __del__(self):
+        self.session.close()
+
