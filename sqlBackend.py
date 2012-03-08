@@ -131,7 +131,6 @@ class Prefix(Base):
     
     def set_primary(self, primary):
         self._primary = primary
-    
 
     override_cqzone = property(get_override_cqzone, set_override_cqzone)
     override_ituzone = property(get_override_ituzone, set_override_ituzone)
